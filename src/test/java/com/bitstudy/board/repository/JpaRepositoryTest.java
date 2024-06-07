@@ -16,9 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Import(JpaConfig.class)
 class JpaRepositoryTest {
-//    @Autowired private ArticleRepository articleRepository;
-//    @Autowired private ArticleCommentRepository articleCommentRepository;
-
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
@@ -60,13 +57,46 @@ class JpaRepositoryTest {
 
         // Then
         assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
-        // 카운트를 새로 구했더니 기존 카운트에 1 더해진거랑 같냐? 라는 말임.
+    }
 
-        /* !!주의: 이상태로 테스트 돌리면 createdAt 이거 못찾는다고 에러남.
-         * 이유: jpaConfig 파일에 auditing 을 쓰겠다고 셋업을 해놨는데
-         *      해당 엔티티(지금은 Article.java)에서도 auditing 을 쓴다고 명시해줘야 한다.
-         *       Article.java 가서 클래스 맨 위에 어노테이션
-         *           @EntityListeners(AuditingEntityListener.class) 이거 넣자
-         *  */
+    /* update 테스트 */
+    @DisplayName("update 테스트") // 이 메소드의 테스트 이름은 'update 테스트'
+    @Test // 테스트 데이터가 주어진 상태에서 updateing 할때 잘 동작하는 경우
+    void updateTest() {
+        // Given
+        Article article = articleRepository.findById(1L).orElseThrow();
+        String updateHashtag = "#springboot";
+        article.setHashtag(updateHashtag);
+
+        // When - 테스트 해야 하는 내용
+        Article savedArticle = articleRepository.saveAndFlush(article);
+
+        // Then
+        assertThat(savedArticle).hasFieldOrPropertyWithValue("hashtag", updateHashtag);
+
+    }
+    /* delete 테스트 */
+    @DisplayName("delete 테스트") // 이 메소드의 테스트 이름은 'delete 테스트'
+    @Test // 테스트 데이터가 주어진 상태에서 deleteing 할때 잘 동작하는 경우
+    void deleteTest() {
+        // Given
+        Article article = articleRepository.findById(1L).orElseThrow();
+
+        long previousArticleCount =  articleRepository.count();
+        long previousArticleCommentCount =  articleCommentRepository.count();
+        int deletedCommentsSize = article.getArticleComments().size();
+
+        // When - 테스트 해야 하는 내용
+        /* 게시글(article) 삭제하기 */
+        articleRepository.delete(article); // delete 에 마우스 올려보면 리턴타입이 void라고 나옴. 별도로 저장할 값 없어서 저장 안함
+
+
+        // Then
+        /* 2번에서 구한거랑 지금 순간의 갯수 비교해서 1 차이나면 테스트 통과한거임. */
+
+        /** 현재 게시글(articleRepository) 의 개수(count()) 가 아까구한 previousArticleCount 보다 1 적으면 테스트 통과 라는 뜻 */
+        assertThat(articleRepository.count()).isEqualTo(previousArticleCount - 1);
+        /** 현재 게시글에 대한 댓글(articleCommentRepository) 개수(count()) 가 아까 구한 previousArticleCommentCount */
+        assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - deletedCommentsSize);
     }
 }
