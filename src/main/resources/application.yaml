@@ -1,40 +1,60 @@
-debug: false  # "디버그 로그를 활성화 할거냐" 인데 true로 놓으면 너무 많아서 false 로 놨다.
-management.endpoints.web.exposure.include: "*" #저번에 actuator 를 깔기만 하고 아무것도 안했는데, 그 안에 숨김처리 되어 있는 endpoint들을 다 나타나게 해주는거. 이게 있어야 개발단계에서 보고싶은 모든 기능을 볼 수 있기 떄문에 필요
+debug: false  # 스프링 부트의 각종 디버그 로그를 다 볼 수 있게 할건지 말건지 결정하는건데. 너무 많아서 false 로 놓을겅미
+management.endpoints.web.exposure.include: "*" # actuator 를 깔기만 하고, 안을 들여보지 않았는데 actuator 의 endpoint의 감춰져 있는것들을 다 볼 수 있게 하는거임. 그래야 개발단계에서 보고싶은 기능을 다 볼 수 있어서 넣었음
 
 logging:
   level:
-    com.com.bitstudy.app: debug #루트 패키지에서 발생하는 모든 로그들은 debug 레벨로 보겠다.
-    org.springframework.web.servlet: debug # 이건 맨 위에 debug와 관련이 있다. 저걸 true로 놓으면 모든 디버그 로그가 나와서 false 로 했지만, 저걸 통해서 해당 리퀘스트 리스폰스 로그가 어떤 패키지에서 오는지 알게 해줌. 다른 기능은 다 냅두고 어디서 디버그 로그가 오는지 확인만 하는거
-    org.hibernate.type.descriptor.sql.BasicBinder: trace # JPA 기술을 사용할때 쿼리 로그를 디버그 로그로 관찰할 수 있는데, 안에 들어가는 바인딩 파라미터들은 다 물음표로 나오고 실제 어떤 파라미터가 들어갔는지 확인할 수 없는데, 그걸 나타내주는거.
+    com.com.bitstudy.app: debug # 루트패키지에서 발행하는 모든 로그는 debug 레벨로 보겠다. 라는 뜻
+    org.springframework.web.servlet: debug # 맨 위에 debug 와 관련 있는건데. 위에껄 true 놓으면 너무 많은 로그가 나와서 보기가 힘들다. 그래서 그걸 false 로 놓고 request, response 로그만 따로 뽑아 보겠다 라는 뜻
+    org.hibernate.type.descriptor.sql.BasicBinder: trace # JPA 기술을 사용할때 쿼리 로그를 디버그 로그로 관찰할 수 있는데 이때 안에 들어가는 파라미터들이 다 물음표로 나온다. 그걸 볼 수 있게 해주는거
 
 spring:
-  datasource: # 데이터베이스에 접근하는 드라이버
+  datasource:
     url: jdbc:mysql://localhost:3306/board
     username: bitstudy
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    defer-datasource-initialization: true # test 용 데이터베이스 데이터를 생성할 수 있게 해주는 거. 나중에 resources 폴더에 data.sql 파일 만들고 쿼리 짜서 넣을거임. 지금은 DB 구성이 다 안되서 못보여줌
-    hibernate.ddl-auto: create # 엔티티를 보고 테이블 데이터를 유추해서 자동으로 DDL 문을 만들어줌. 우리꺼 domain > Article 파일을 보고 create table 구문을 만들어서 테스트가 실행될때 자동으로 Article 과 ArticleComment 테이블을 생성해준다.
-    show-sql: true # sql 쿼리 보여주는거
-    properties: #JPA 에 종속된 properties 보여줌. 하이버네이트 쓸거임.
-      hibernate.format_sql: true #한줄로 나오는 sql 문을 하이버네이트에서 작성한 포멧에 맞춰서 줄바꿈 해줌
-      hibernate.default_batch_fetch_size: 100 # JPA 에서 복잡한 쿼리를 사용할때 한번에 벌크로 셀렉트 해올수 있게 해주는거.
-      # 예를들어 조인 테이블로 가져와야 하는 row 수가 10개면 쿼리가 10개 만들어질건데
-      # 이걸 이용하면 한번에 셀렉트 IN 절을 이용해서 한번에 모아보내는 기능이다. 최대값이 100인 경우 최대 100개를 벌크로 셀렉트 할 수 있게 해주는거
-  h2.console.enabled: false # h2 콘솔이라는 웹 콘솔을 제공하는데 필요 없다.
-  sql.init.mode: always # 아까 말했던 data.sql 어떤 모드에서 동작시킬건지 정하는거
-  # naver(절대 동작 안함), always(리얼 환경), Embedded(테스트환경)
-  # 우리는 예제라서 실제 화면에서 볼때도 테스트때 사용했던 데이터들도 이용할거라서 always 로 한다.
+  #    url: jdbc:h2:mem:testdb
+  #    username: sa
+  #    driver-class-name: org.h2.Driver
 
+  jpa:
+    defer-datasource-initialization: true # test 용 데이터베이스 데이터를 생성할수 있게 해줄거임. 나중에 resources 안에 (무조건)data.sql 파일 만들어서 DB 에 초기 데이터를 테스트용으로 넣을수 있다. 지금은 DB 구성이 다 안되서 못보여줌
+    hibernate.ddl-auto: create # 엔티티를 보고 테이블 데이터를 유추해서 자동으로 DDL 데이터를 만든다. domain > Article 엔티티를 보고 create table 문을 만들어서 테스트 실행될때 자동으로 Article 과  ArticleComment 생성해서 만들어줌. 우리가 짜지 않아도 되게끔.
+    show-sql: true # 디버그모드에서 sql 문장 보여줄까? 하는거
+    properties: #JPA 에서 사용할 구현체의 종속된 properties 를 설정할 수 있게 하는 부분
+      hibernate.format_sql: true # 한줄로 나오던 sql 문을 예쁘게 포메팅 해주는 기능.
+      hibernate.default_batch_fetch_size: 100 # JPA 에서 연관관계가 맵핑이 되어 있는 쿼리를 사용해야 할때 한번에 벌크로 select 를 해올수 있게 해주는거.
+      # 예를들어 테이블에서 join 으로 가져와야 하는 row 수가 10개정도 되면 쿼리가 10개정도 만들어질수도 있는데 그걸 해결해줌.
+      # 복잡한 조회쿼리 작성시, 지연로딩으로 발생해야 하는 쿼리를  IN 절로 한번에  모아보내는 기능이다.
+  h2.console.enabled: false # h2 콘솔을 활성화 할거냐고 하는거임.
+  #  h2.console.enabled: true # h2 콘솔을 사용하겠다는 뜻
+  sql.init.mode: always # 아까 만든 data.sql 를 언제 작동시킬건가 하는거
+  # naver(절대 사용 안함), always(리얼 환경에서), Embedded(테스트 때만)
+  # 우리는 강의 예제라서 실제 화면에서 볼때도 테스트때 사용했던 데이터들도 이용할거라서 always 로 한다.
+
+
+  # 이건 Ex07_ 할때 하기
+  data.rest:
+      base-path: /api  # 우리가 엑셀에서 설계한거 보면 url 맨 앞에 /api 로 되어 있음
+      detection-strategy: annotated  #어노테이션으로 지정한 것만
+      # 우리가 가지고 있는 프로젝트의 레포지토리를 확인할건데, 이 레포지토리를 rest api 로 노출시킬건지 정하는거임.
+      # default - 모든 public 리포지토리 인터페이스를 표시. 그러나 @RestResource 가 포함된것만 노출
+      # all - 모든 레포지토리 노출
+      # annotated - 지정한것만 노출
+      # visibility - 레포지토리를 public으로 노출한것만
+
+      # 사실 뭐로 하던 상관 없음. 왜냐면 우린 도메인이 두개밖에 없잖슴. 둘 다 공개로 놓을거고.
+      ####################################################################################
+      # " Ex07_1_ArticleRepository_api_테스트_정의_관련 " 가서 작업 시작   #################
+      ####################################################################################
 
 ---
 # yaml 파일은 --- 로 document 를 구분지을수 있다. 위에꺼는 기본 doc이고
 # 각 doc 마다 다른 profile 들을 지정해서 설정할 수 있다.
 # 이건 "testdb 프로파일이 액티베이션 될때 이 doc을 읽어라" 라는뜻
 #
-spring:
-  config.activate.on-profile: testdb
+#spring:
+#  config.activate.on-profile: testdb
   #  datasource:
   #    url: jdbc:h2:mem:board;mode=mysql
   #    driverClassName: org.h2.Driver
