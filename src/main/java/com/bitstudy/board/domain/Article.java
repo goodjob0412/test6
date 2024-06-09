@@ -1,20 +1,14 @@
 package com.bitstudy.board.domain;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-
 
 @Getter
 @ToString
@@ -33,7 +27,8 @@ public class Article extends AuditingFields {
 
     @Setter @Column(nullable = false) private String title;
     @Setter @Column(nullable = false, length = 10000) private String content;
-    @Setter private String hashtag; // 해시태그
+    @Setter
+    private String hashtag; // 해시태그
 
 
 
