@@ -47,27 +47,37 @@ dependencies {
 //	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
 	//querydsl dependencies 추가(스프링부트 3.0 이상)
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+//	implementation "com.querydsl:querydsl-core"
+//	implementation "com.querydsl:querydsl-collections"
+	implementation "com.querydsl:querydsl-jpa:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-
-
 }
-
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
 
 ///////////////////////////////////////////////////////////////////
-//////////////  queryDSL 설정부  시작 ////////////////////////////
+/////////////////  queryDSL 설정부  시작 ////////////////////////////
 def generated = 'src/main/generated'
-def querydslSrcDir = 'src/main/generated'
+// gradle clean 시에 QClass 디렉토리 삭제
 clean {
-	delete file(querydslSrcDir)
+	delete file(generated)
 }
+
 tasks.withType(JavaCompile) {
-	options.generatedSourceOutputDirectory = file(querydslSrcDir)
+	options.generatedSourceOutputDirectory = file(generated)
 }
+
+
+//tasks.withType(JavaCompile) {
+//    options.getGeneratedSourceOutputDirectory().set(file(generated))
+//}
+//
+//// java source set 에 querydsl QClass 위치 추가
+//sourceSets {
+//    main.java.srcDirs += [ generated ]
+//}
